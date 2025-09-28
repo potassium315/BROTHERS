@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our School Days</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #3b82f6, #09f9c1, #ee16f1);
+            background-attachment: fixed;
+            color: #e2e8f0; 
+        }
+        .page { display: none; animation: fadeInUp 0.7s ease-in-out; }
+        .page.active { display: block; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .photo-item { transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, filter 0.3s; }
+        .photo-item:hover { transform: scale(1.03); z-index: 10; filter: brightness(1.05); }
+        .photo-container:hover { box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25); transform: scale(1.03); }
+        .title-anim { 
+            animation: text-focus-in 1s cubic-bezier(0.550, 0.085, 0.680, 0.530) both;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        @keyframes text-focus-in {
+            0% { filter: blur(12px); opacity: 0; }
+            100% { filter: blur(0px); opacity: 1; }
+        }
+        html { scroll-behavior: smooth; }
+
+        .action-btn {
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        .action-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #contact-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            z-index: 10000; display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #contact-modal.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: rgba(41, 41, 61, 0.8); padding: 2rem; border-radius: 1rem;
+            width: 90%; max-width: 500px; position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2); animation: fadeInUp 0.5s;
+        }
+        .modal-close {
+            position: absolute; top: 15px; right: 20px; font-size: 2rem;
+            color: #a0aec0; cursor: pointer; transition: color 0.2s;
+        }
+        .modal-close:hover { color: #fff; }
+
+        #maker-toggle-btn {
+            background: none; border: none; padding: 0.5rem;
+            cursor: pointer; width: 100%;
+            transition: transform 0.2s ease;
+        }
+        #maker-toggle-btn:hover { transform: scale(1.02); }
+        .arrow-icon {
+            display: inline-block;
+            transition: transform 0.5s ease;
+        }
+        #maker-toggle-btn.active .arrow-icon {
+            transform: rotate(180deg);
+        }
+        #maker-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s ease-in-out;
+        }
+        #maker-details.expanded {
+            max-height: 300px; /* Adjust if content is taller */
+        }
+        
+        .story-block {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem; /* rounded-lg */
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+        .story-block:hover {
+             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+             transform: scale(1.05);
+        }
+        .story-block img {
+            transition: transform 0.4s ease-in-out;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .story-block:hover img {
+            transform: scale(1.15);
+        }
+        .story-block-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%);
+            padding: 2.5rem 1rem 1rem 1rem;
+            text-align: center;
+        }
+        .story-block-title {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700;
+            color: white;
+            transition: color 0.3s ease;
+        }
+        .story-block:hover .story-block-title {
+            color: #22d3ee; /* cyan-400 */
+        }
+        .story-content-wrapper {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: rgba(26, 26, 46, 0.7);
+            padding: 2rem 2.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .story-content-wrapper p {
+            line-height: 1.8;
+            font-size: 1.125rem; /* text-lg */
+            color: #cbd5e1; /* slate-300 */
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="container mx-auto p-4 md-p-8">
+
+        <div id="intro-page" class="page active">
+            <div class="flex flex-col items-center justify-center min-h-screen text-center">
+                <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white title-anim leading-tight">
+                    LET ME INTRODUCE YOU OUR<br>UNSHAKABLE ERA OF FRIENDSHIP
+                </h1>
+                <button id="dive-in-btn" class="mt-12 bg-white/20 backdrop-blur-sm text-white font-bold py-3 px-8 rounded-lg text-lg border border-white/30 action-btn">
+                    Let's dive in this journey
+                </button>
+                <button id="contact-btn" class="mt-4 bg-transparent text-white font-semibold py-3 px-8 rounded-lg text-md border border-white/30 action-btn">
+                    CONTACT US
+                </button>
+            </div>
+        </div>
+
+        <div id="main-gallery" class="page">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white title-anim"> BROTHERS </h1>
+                <h4 class="text-lg text-slate-300 mt-2">KENDRIYA VIDYALAYA ALIGANJ JOURNEY</h4>
+                <p class="text-lg text-slate-300 mt-2">US 8</p>
+            </header>
+            
+            <main id="collage-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16"></main>
+            
+            <section id="members-section" class="py-12 border-t border-cyan-400/50">
+                <h2 class="text-3xl font-bold text-center mb-10 text-white">The Group</h2>
+                <div id="members-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-6 md:gap-8"></div>
+            </section>
+
+            <section class="text-center py-12 border-t border-cyan-400/50">
+                <button id="go-to-storytime-btn" class="bg-white/20 backdrop-blur-sm text-white font-bold py-4 px-10 rounded-lg text-xl border border-white/30 action-btn uppercase tracking-wider">
+                    Storytime
+                </button>
+            </section>
+
+            <section id="maker-section" class="py-12 border-t border-cyan-400/50 text-center">
+                <button id="maker-toggle-btn">
+                    <h2 class="text-3xl font-bold text-white inline-flex items-center gap-3">
+                        About the Maker
+                        <span class="arrow-icon">▼</span>
+                    </h2>
+                </button>
+                <div id="maker-details">
+                    <div class="mt-6 max-w-md mx-auto bg-white/10 p-6 rounded-lg shadow-lg backdrop-blur-sm border border-white/20">
+                        <div class="space-y-3 text-slate-200 text-left">
+                            <p><strong class="font-medium text-slate-100">Name:</strong> Kulshreshtha Sharma</p>
+                            <p><strong class="font-medium text-slate-100">About:</strong> Love making websites and diving deep in java.</p>
+                            <p><strong class="font-medium text-slate-100">Education:</strong> Pursuing BCA from University of Lucknow.</p>
+                            <p><strong class="font-medium text-slate-100">Instagram:</strong> 
+                                <a href="https://www.instagram.com/potassium391" target="_blank" class="text-cyan-400 hover:underline">@potassium391</a>
+                            </p>
+                            <p><strong class="font-medium text-slate-100">Email:</strong> 
+                                <a href="mailto:ps4338360@gmail.com" class="text-cyan-400 hover:underline">ps4338360@gmail.com</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="member-pages-container"></div>
+        
+        <div id="storytime-page-container"></div>
+        <div id="story-pages-container"></div>
+
+    </div>
+
+    <div id="contact-modal">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close-btn">&times;</span>
+            <h2 class="text-2xl font-bold text-cyan-300 mb-4 text-center">ABOUT MAKER</h2>
+            <div class="space-y-3 text-slate-200">
+                <p><strong class="font-medium text-slate-100">Name:</strong> Kulshreshtha Sharma</p>
+                <p><strong class="font-medium text-slate-100">About:</strong> Love making websites and diving deep in java.</p>
+                <p><strong class="font-medium text-slate-100">Education:</strong> Pursuing BCA from University of Lucknow.</p>
+                <p><strong class="font-medium text-slate-100">Instagram:</strong> 
+                    <a href="https://www.instagram.com/potassium391" target="_blank" class="text-cyan-400 hover:underline">@potassium391</a>
+                </p>
+                <p><strong class="font-medium text-slate-100">Email:</strong> 
+                    <a href="mailto:ps4338360@gmail.com" class="text-cyan-400 hover:underline">ps4338360@gmail.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- DATA ---
+            const members = [
+                { id: 1, name: 'Kulshreshtha Sharma', ig: '@potassium391', profilePic: 'SchoolGroupCollage/Kulshreshtha.jpg', photos: ['SchoolGroupPrototype/kulshreshtha-1.jpg', 'SchoolGroupPrototype/kulshreshtha-2.jpg', 'SchoolGroupPrototype/kulshreshtha-3.jpg', 'SchoolGroupPrototype/kulshreshtha-4.jpg', 'SchoolGroupPrototype/kulshreshtha-5.jpg'], description: 'The anchor of the group, He stablizes the bond among all. "POTASSIUM"' },
+                { id: 2, name: 'Aditya Awasthi', ig: '@aditya_awasthi07', profilePic: 'SchoolGroupCollage/Aditya.jpg', photos: ['SchoolGroupPrototype/aditya-1.jpg', 'SchoolGroupPrototype/aditya-2.jpg', 'SchoolGroupPrototype/aditya-3.jpg', 'SchoolGroupPrototype/aditya-4.jpg', 'SchoolGroupPrototype/aditya-5.jpg'], description: 'The heart of the party, bringing laughter and energy wherever he goes.  "MARD"' },
+                { id: 3, name: 'Akhil Kumar', ig: '@akhilkumar4420', profilePic: 'SchoolGroupCollage/Akhil.jpg', photos: ['SchoolGroupPrototype/akhil-1.jpg', 'SchoolGroupPrototype/akhil-2.jpg', 'SchoolGroupPrototype/akhil-3.jpg', 'SchoolGroupPrototype/akhil-4.jpg', 'SchoolGroupPrototype/akhil-5.jpg'], description: 'The friend of all, very polite and simple. His presence matters.  "DANAV"' },
+                { id: 4, name: 'Saurabh Awasthi', ig: '@mr_brahman_004', profilePic: 'SchoolGroupCollage/Saurabh.jpg', photos: ['SchoolGroupPrototype/saurabh-1.jpg', 'SchoolGroupPrototype/saurabh-2.jpg', 'SchoolGroupPrototype/saurabh-3.jpg', 'SchoolGroupPrototype/saurabh-4.jpg', 'SchoolGroupPrototype/saurabh-5.jpg'], description: 'A true brother in arms, fiercely loyal and always ready to kill opponent.  "AWASTHI"' },
+                { id: 5, name: 'Manas Singh', ig: '@not_urtypemickey', profilePic: 'SchoolGroupCollage/Manas.jpg', photos: ['SchoolGroupPrototype/manas-1.jpg', 'SchoolGroupPrototype/manas-2.jpg', 'SchoolGroupPrototype/manas-3.jpg', 'SchoolGroupPrototype/manas-4.jpg', 'SchoolGroupPrototype/manas-5.jpg'], description: 'The creative soul, always seeing the world from a unique and inspiring perspective.  "ANIME KA 14"' },
+                { id: 6, name: 'Aviral Sahu', ig: '@typically_aviral14', profilePic: 'SchoolGroupCollage/Aviral.jpg', photos: ['SchoolGroupPrototype/aviral-1.jpg', 'SchoolGroupPrototype/aviral-2.jpg', 'SchoolGroupPrototype/aviral-3.jpg', 'SchoolGroupPrototype/aviral-4.jpg', 'SchoolGroupPrototype/aviral-5.jpg'], description: 'The calm in the storm, extrovert soul, who makes everyone laugh.  "BAUNA"' },
+                { id: 7, name: 'Vaibhav', ig: '@thakur_yuvraaj_295', profilePic: 'SchoolGroupCollage/Vaibhav.jpg', photos: ['SchoolGroupPrototype/vaibhav-1.jpg', 'SchoolGroupPrototype/vaibhav-2.jpg', 'SchoolGroupPrototype/vaibhav-3.jpg', 'SchoolGroupPrototype/vaibhav-4.jpg', 'SchoolGroupPrototype/vaibhav-5.jpg'], description: 'Bold and fearless, Walking definition of AURA . "BABBO"' },
+                { id: 8, name: 'Mayank Tripathi', ig: '@justsaymkt', profilePic: 'SchoolGroupCollage/Mayank.jpg', photos: ['SchoolGroupPrototype/mayank-1.jpg', 'SchoolGroupPrototype/mayank-2.jpg', 'SchoolGroupPrototype/mayank-3.jpg', 'SchoolGroupPrototype/mayank-4.jpg', 'SchoolGroupPrototype/mayank-5.jpg'], description: 'The storyteller, he tries new things and he has that "KEEDA" for doing anything.  "TRIPATHI"' },
+            ];
+            
+            // THIS IS THE UPDATED SECTION
+            const stories = [
+                { id: 1, title: 'Class 11th A', image: 'StoryCovers/story-1.jpg', content: 'The Legacy of class 11th A, jisme baith-te the ham PCM + CS wale, jo students kam gunde zada lagte the, Kulshreshtha Sharma, Akhil kumar, Aditya Awasthi, Mayank Tripathi, Saurabh Awasthi & Manas Singh. Class 11th A is truly an emotion...' },
+                { id: 2, title: 'TEACHERS DAY OF CLASS 11th A', image: 'StoryCovers/story-2.jpg', content: 'Jaise bhi the baakisab, ache hi the, everyone was Good, and yes its true ki jab ham bade hote hain tb hamme masumiyat aur insaniyat khatm hone lg jaati hai. Look at everyone how excited everyone was. Koi soch skta hai maine 3 baar CAKE manga hoga 😂😂😂 ' },
+                { id: 3, title: 'KV ke bagal ka PARK', image: 'StoryCovers/story-3.jpg', content: '12:20 ki chutti ke baad ghar thodi jana hai, chlo apne adde pe chlte hain, KV KE BAGAL WALE PARK, salaa bas wahan pe baatein hoti thi, DUKH baate jaate the, MAZE kiye jate the, ek baar to barish me BENCH ukhaad di thi ham logo ne. Bhai kuch bhi kaho MEMORIES to banai hain KV me padh ke.' },
+                { id: 4, title: 'PARK ka CHOTA BHEEM', image: 'StoryCovers/story-4.jpg', content: 'Ab jo bhi horha hai BHEEM ke sath acha to nhi horha 😂😂😂, par hame MAZA aarha hai, MAUJ MASTI rukni nahu chahiye. PARK ka BHEEM, KACCHUA(TURTLE), JHULE, BENCHES, PED aur HAM SAB sach me milke MOMENTS banate the, ZINDAGI me kuch ukhada ho na ukhada ho, kuch ukhaad paayein ya na ukhaad paayein, BHAI jaise dost to kama liye hain 🫂🫂🫂 ' },
+                { id: 5, title: 'HOLI 2023', image: 'StoryCovers/story-5.jpg', content: 'Never felt good or excited for celebrating any Festivals, but these are the GEMS which make anything JOYFUL, these are the best guys I;ve ever met. HOLI ho ya DIWALI, TEACHERS DAY, FAREWELL, kitne hi moments ginaun aur kitne saalon ke ginaun, ek badhiya cheez kahi hai kisine "DOST WO HAI JISKE PAAS HAZAR WAJHEIN HAIN AAPSE NAFRAT KARNE KI, FIR BHI WO AAPKO CHAHTA HAI. To yahi hain mere dost, meri hazar kamiyon ko bhula dete hain. Aur mai bhi to bhulata hun, sale ek se ek bade wale hain- Koi Galiyon ka ARTISt hai, Koi Saddist hai, Koi HAWABAAZI me upar chadha hua hai, Koi bahut bada AASHIQ hai, Koi bahud bada BAKAIT, Koi Kanjus hai to Koi BADMASH, par hain to saare bhai hii.' },
+                { id: 6, title: 'Saurabh bhai se Bakchodi', image: 'StoryCovers/story-6.jpg', content: 'Ye apna Saurabh Bhai hai, Awasthi se Bakchodi karne ka maza hi kuch aur hai, itna bada harami tha ye sala ki naa kaam pura krta tha na kuch, khali isne 11th bhar bakchodi ki hai, aur sala ek baar ye 0 number laya COMPUTER SCIENCE me aur sale ne GAURAV SIR ko 5 number bodiye 😂😂😂😂😂. Fir bhi pakda gaya tha Pandit. Bahut maze kiye hain bhai ne, ek baat badhoya thi bhai ki, jab koi glt krta tha to Saurabh maze leta tha uske, Saurabh bhai ne Mayank ko to kitna sunaya hai 😂😂. ' }
+            ];
+            // END OF UPDATED SECTION
+
+            const friendshipQuotes = [
+                "Friends are the family we choose for ourselves.",
+                "A journey is best measured in friends, rather than miles.",
+                "Good times and crazy friends make the best memories."
+            ];
+
+            const collageContainer = document.getElementById('collage-container');
+            const membersContainer = document.getElementById('members-container');
+            const memberPagesContainer = document.getElementById('member-pages-container');
+            const storytimePageContainer = document.getElementById('storytime-page-container');
+            const storyPagesContainer = document.getElementById('story-pages-container');
+
+            function showPage(pageId) {
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                    window.scrollTo(0, 0);
+                }
+            }
+            
+            let collageHTML = '';
+            let quoteIndex = 0;
+            for (let i = 1; i <= 12; i++) {
+                collageHTML += `
+                    <div class="photo-container bg-white/10 p-1.5 rounded-lg shadow-lg transition-all duration-300">
+                        <img src="SchoolGroupCollage/GROUP${i}.jpg" alt="Group Photo ${i}" class="w-full h-full object-cover photo-item rounded-md" loading="lazy">
+                    </div>`;
+                
+                if (i % 3 === 0 && i < 12) {
+                    if (friendshipQuotes[quoteIndex]) {
+                        collageHTML += `
+                            <div class="sm:col-span-2 lg:col-span-3 text-center py-8">
+                                <p class="text-2xl italic text-white/90 text-shadow">"${friendshipQuotes[quoteIndex]}"</p>
+                            </div>
+                        `;
+                        quoteIndex++;
+                    }
+                }
+            }
+            collageContainer.innerHTML = collageHTML;
+
+            let membersHTML = '';
+            members.forEach(member => {
+                const igUsername = member.ig.startsWith('@') ? member.ig.substring(1) : member.ig;
+                membersHTML += `
+                    <div class="text-center group">
+                        <a href="#member-${member.id}" data-member-id="${member.id}" class="member-link cursor-pointer block">
+                            <div class="relative">
+                                <img src="${member.profilePic}" alt="${member.name}" class="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full object-cover border-4 border-white/80 shadow-lg group-hover:border-cyan-400 transition-all duration-300 transform group-hover:scale-110">
+                            </div>
+                            <h3 class="mt-4 text-md md:text-lg font-semibold text-slate-100 group-hover:text-cyan-300 transition-colors truncate">${member.name}</h3>
+                        </a>
+                        <a href="https://www.instagram.com/${igUsername}/" target="_blank" rel="noopener noreferrer" class="text-sm text-slate-300 hover:text-cyan-300 transition-colors">
+                            ${member.ig}
+                        </a>
+                    </div>
+                `;
+            });
+            membersContainer.innerHTML = membersHTML;
+            
+            let memberPagesHTML = '';
+            members.forEach(member => {
+                const igUsername = member.ig.startsWith('@') ? member.ig.substring(1) : member.ig;
+                memberPagesHTML += `
+                    <div id="member-page-${member.id}" class="page">
+                        <header class="flex flex-col items-center justify-between mb-8 text-center gap-6">
+                             <button class="back-to-gallery-btn w-full sm:w-auto bg-transparent hover:bg-cyan-400 text-cyan-300 hover:text-white font-bold py-2 px-5 rounded-lg transition-colors border-2 border-cyan-400 shadow-sm">
+                                 &larr; Back to Main Gallery
+                             </button>
+                            <div class="flex items-center space-x-4">
+                                <img src="${member.profilePic}" alt="${member.name} Profile" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md">
+                                <div>
+                                    <h1 class="text-4xl md:text-5xl font-bold text-white">${member.name}</h1>
+                                    <a href="https://www.instagram.com/${igUsername}/" target="_blank" rel="noopener noreferrer" class="text-md text-slate-300 hover:text-cyan-300 transition-colors">
+                                        ${member.ig}
+                                    </a>
+                                </div>
+                            </div>
+                            <p class="text-lg italic text-slate-200 max-w-2xl">${member.description}</p>
+                        </header>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${member.photos.map(photo => `
+                                <div class="photo-container bg-white/10 p-1.5 rounded-lg shadow-lg">
+                                    <img src="${photo}" alt="${member.name}'s photo" class="w-full h-auto object-cover photo-item rounded-md" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            memberPagesContainer.innerHTML = memberPagesHTML;
+            
+            let storytimePageHTML = `
+                <div id="storytime-page" class="page">
+                    <header class="text-center mb-12 flex flex-col items-center gap-6">
+                        <button class="back-to-gallery-btn w-full sm:w-auto bg-transparent hover:bg-cyan-400 text-cyan-300 hover:text-white font-bold py-2 px-5 rounded-lg transition-colors border-2 border-cyan-400 shadow-sm">
+                           &larr; Back to Main Gallery
+                        </button>
+                        <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white title-anim">Our Unforgettable Stories</h1>
+                        <p class="text-lg text-slate-300 mt-2">Moments that became memories.</p>
+                    </header>
+                    <main class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                        ${stories.map(story => `
+                            <a href="#story-${story.id}" data-story-id="${story.id}" class="story-link aspect-w-1 aspect-h-1 block story-block bg-slate-800">
+                                <img src="${story.image}" alt="${story.title}" loading="lazy">
+                                <div class="story-block-overlay">
+                                    <h3 class="story-block-title">${story.title}</h3>
+                                </div>
+                            </a>
+                        `).join('')}
+                    </main>
+                </div>
+            `;
+            storytimePageContainer.innerHTML = storytimePageHTML;
+
+            let storyPagesHTML = '';
+            stories.forEach(story => {
+                storyPagesHTML += `
+                    <div id="story-page-${story.id}" class="page">
+                        <header class="text-center mb-8 flex flex-col items-center gap-6">
+                            <button data-story-id="${story.id}" class="back-to-storytime-btn w-full sm:w-auto bg-transparent hover:bg-cyan-400 text-cyan-300 hover:text-white font-bold py-2 px-5 rounded-lg transition-colors border-2 border-cyan-400 shadow-sm">
+                                &larr; Back to All Stories
+                            </button>
+                            <h1 class="text-4xl md:text-5xl font-bold text-white">${story.title}</h1>
+                        </header>
+                        <div class="story-content-wrapper">
+                            <p>${story.content}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            storyPagesContainer.innerHTML = storyPagesHTML;
+
+            document.getElementById('dive-in-btn').addEventListener('click', () => showPage('main-gallery'));
+
+            document.querySelectorAll('.member-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(`member-page-${link.dataset.memberId}`);
+                });
+            });
+
+            document.querySelectorAll('.back-to-gallery-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage('main-gallery');
+                });
+            });
+            
+            document.getElementById('go-to-storytime-btn').addEventListener('click', () => showPage('storytime-page'));
+
+            document.querySelectorAll('.story-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(`story-page-${link.dataset.storyId}`);
+                });
+            });
+
+            document.querySelectorAll('.back-to-storytime-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage('storytime-page');
+                });
+            });
+
+            const contactModal = document.getElementById('contact-modal');
+            const contactBtn = document.getElementById('contact-btn');
+            const closeModalBtn = document.getElementById('modal-close-btn');
+
+            contactBtn.addEventListener('click', () => contactModal.classList.add('active'));
+            closeModalBtn.addEventListener('click', () => contactModal.classList.remove('active'));
+            contactModal.addEventListener('click', (e) => {
+                if (e.target === contactModal) contactModal.classList.remove('active');
+            });
+
+            const makerToggleBtn = document.getElementById('maker-toggle-btn');
+            const makerDetails = document.getElementById('maker-details');
+
+            makerToggleBtn.addEventListener('click', () => {
+                makerDetails.classList.toggle('expanded');
+                makerToggleBtn.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>
